@@ -20,17 +20,17 @@ const socialLinks = [
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-900 text-gray-400">
-      <div className="max-w-7xl mx-auto px-4 py-16">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
-          <div className="col-span-2 md:col-span-1">
+    <footer className="bg-white text-slate-500 border-t border-slate-200">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 sm:gap-10">
+          <div className="col-span-2 sm:col-span-3 lg:col-span-1">
             <Link to="/" className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shrink-0">
                 <FileText className="h-5 w-5 text-white" />
               </div>
-              <span className="font-semibold text-xl text-white">DocSync</span>
+              <span className="font-semibold text-xl text-slate-900">DocSync</span>
             </Link>
-            <p className="text-sm mb-6">
+            <p className="text-sm mb-6 max-w-xs">
               Real-time document collaboration for modern teams. Create, share, and collaborate seamlessly.
             </p>
             <div className="flex items-center gap-3">
@@ -40,7 +40,7 @@ export default function Footer() {
                   <a
                     key={social.label}
                     href={social.href}
-                    className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-700 transition-colors"
+                    className="w-10 h-10 bg-slate-100 border border-slate-200 rounded-lg flex items-center justify-center text-slate-500 hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-colors"
                     aria-label={social.label}
                   >
                     <Icon className="h-5 w-5" />
@@ -52,11 +52,11 @@ export default function Footer() {
 
           {Object.entries(footerLinks).map(([category, links]) => (
             <div key={category}>
-              <h3 className="text-white font-semibold mb-4">{category}</h3>
-              <ul className="space-y-2">
+              <h3 className="text-slate-900 font-semibold mb-4">{category}</h3>
+              <ul className="space-y-2.5">
                 {links.map((link) => (
                   <li key={link}>
-                    <a href="#" className="text-sm hover:text-white transition-colors">
+                    <a href="#" className="text-sm hover:text-indigo-600 transition-colors">
                       {link}
                     </a>
                   </li>
@@ -66,16 +66,16 @@ export default function Footer() {
           ))}
         </div>
 
-        <Separator className="my-12 bg-gray-800" />
+        <Separator className="my-10 sm:my-12 bg-slate-200" />
 
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
           <p className="text-sm">
             © {new Date().getFullYear()} DocSync. All rights reserved.
           </p>
-          <div className="flex items-center gap-6 text-sm">
-            <a href="#" className="hover:text-white transition-colors">Status</a>
-            <a href="#" className="hover:text-white transition-colors">Security</a>
-            <a href="#" className="flex items-center gap-2 hover:text-white transition-colors">
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm">
+            <a href="#" className="hover:text-indigo-600 transition-colors">Status</a>
+            <a href="#" className="hover:text-indigo-600 transition-colors">Security</a>
+            <a href="#" className="flex items-center gap-2 hover:text-indigo-600 transition-colors">
               <Mail className="h-4 w-4" />
               support@docsync.io
             </a>

@@ -24,11 +24,7 @@ import {
   Highlighter,
   ChevronDown,
   Minus,
-  Table,
   Palette,
-  MoreHorizontal,
-  Subscript,
-  Superscript,
 } from 'lucide-react';
 import { Editor } from '@tiptap/react';
 import { Button } from '@/components/ui/button';
@@ -76,12 +72,17 @@ const textColors = [
   { name: 'Purple', value: '#9333ea' },
 ];
 
+// Shared class strings so every toggle button in the bar stays visually
+// identical: flat slate ghost state, solid indigo when active — no gradients.
+const btnBase = 'h-8 w-8 p-0 shrink-0';
+const activeCls = 'bg-indigo-600 text-white hover:bg-indigo-700';
+
 export function EditorToolbar({ editor }: EditorToolbarProps) {
   const [linkUrl, setLinkUrl] = useState('');
   const [imageUrl, setimageUrl] = useState('');
 
   if (!editor) {
-    return <div className="h-12 bg-gray-50 border-b border-gray-200" />;
+    return <div className="h-12 bg-white border-b border-slate-200" />;
   }
 
   const setLink = () => {
@@ -101,7 +102,12 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
 
   return (
     <TooltipProvider>
-      <div className="bg-gray-50 border-b border-gray-200 px-4 py-2 flex items-center gap-1 flex-wrap sticky top-0 z-10">
+      <div
+        className="bg-white border-b border-slate-200 px-2 sm:px-4 py-2 flex items-center gap-1
+                   overflow-x-auto sm:overflow-visible sm:flex-wrap sticky top-0 z-10
+                   [scrollbar-width:none] [-ms-overflow-style:none]
+                   [&::-webkit-scrollbar]:hidden"
+      >
         {/* Undo/Redo */}
         <Tooltip>
           <TooltipTrigger asChild>
@@ -110,7 +116,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
               size="sm"
               onClick={() => editor.chain().focus().undo().run()}
               disabled={!editor.can().undo()}
-              className="h-8 w-8 p-0"
+              className={btnBase}
             >
               <Undo className="h-4 w-4" />
             </Button>
@@ -125,7 +131,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
               size="sm"
               onClick={() => editor.chain().focus().redo().run()}
               disabled={!editor.can().redo()}
-              className="h-8 w-8 p-0"
+              className={btnBase}
             >
               <Redo className="h-4 w-4" />
             </Button>
@@ -133,54 +139,52 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
           <TooltipContent>Redo (Ctrl+Y)</TooltipContent>
         </Tooltip>
 
-        <Separator orientation="vertical" className="h-6 mx-1" />
+        <Separator orientation="vertical" className="h-6 mx-1 shrink-0" />
 
-        {/* Font Family - placeholder for now */}
-        <Select
-          value="Inter"
-          onValueChange={() => {}}
-        >
-          <SelectTrigger className="w-32 h-8 text-xs">
-            <SelectValue placeholder="Font" />
-          </SelectTrigger>
-          <SelectContent>
-            {fontFamilies.map((font) => (
-              <SelectItem key={font.value} value={font.value} style={{ fontFamily: font.value }}>
-                {font.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {/* Font Family — hidden below sm, takes too much width to justify on phones */}
+        <div className="hidden sm:block shrink-0">
+          <Select value="Inter" onValueChange={() => {}}>
+            <SelectTrigger className="w-32 h-8 text-xs border-slate-200">
+              <SelectValue placeholder="Font" />
+            </SelectTrigger>
+            <SelectContent>
+              {fontFamilies.map((font) => (
+                <SelectItem key={font.value} value={font.value} style={{ fontFamily: font.value }}>
+                  {font.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-        {/* Font Size - placeholder for now */}
-        <Select
-          value="16px"
-          onValueChange={() => {}}
-        >
-          <SelectTrigger className="w-16 h-8 text-xs">
-            <SelectValue placeholder="Size" />
-          </SelectTrigger>
-          <SelectContent>
-            {fontSizes.map((size) => (
-              <SelectItem key={size.value} value={size.value}>
-                {size.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {/* Font Size */}
+        <div className="hidden sm:block shrink-0">
+          <Select value="16px" onValueChange={() => {}}>
+            <SelectTrigger className="w-16 h-8 text-xs border-slate-200">
+              <SelectValue placeholder="Size" />
+            </SelectTrigger>
+            <SelectContent>
+              {fontSizes.map((size) => (
+                <SelectItem key={size.value} value={size.value}>
+                  {size.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-        <Separator orientation="vertical" className="h-6 mx-1" />
+        <Separator orientation="vertical" className="h-6 mx-1 shrink-0 hidden sm:block" />
 
         {/* Headings */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-8 px-2">
-              <span className="text-xs font-medium text-gray-600 mr-1">
+            <Button variant="ghost" size="sm" className="h-8 px-2 shrink-0">
+              <span className="text-xs font-medium text-slate-600 mr-1">
                 {editor.isActive('heading', { level: 1 }) ? 'H1' :
                  editor.isActive('heading', { level: 2 }) ? 'H2' :
                  editor.isActive('heading', { level: 3 }) ? 'H3' : 'Normal'}
               </span>
-              <ChevronDown className="h-3 w-3 text-gray-400" />
+              <ChevronDown className="h-3 w-3 text-slate-400" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start">
@@ -199,7 +203,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <Separator orientation="vertical" className="h-6 mx-1" />
+        <Separator orientation="vertical" className="h-6 mx-1 shrink-0" />
 
         {/* Text Formatting */}
         <Tooltip>
@@ -208,7 +212,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
               variant={editor.isActive('bold') ? 'default' : 'ghost'}
               size="sm"
               onClick={() => editor.chain().focus().toggleBold().run()}
-              className={`h-8 w-8 p-0 ${editor.isActive('bold') ? 'bg-blue-600 text-white hover:bg-blue-700' : ''}`}
+              className={`${btnBase} ${editor.isActive('bold') ? activeCls : ''}`}
             >
               <Bold className="h-4 w-4" />
             </Button>
@@ -222,7 +226,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
               variant={editor.isActive('italic') ? 'default' : 'ghost'}
               size="sm"
               onClick={() => editor.chain().focus().toggleItalic().run()}
-              className={`h-8 w-8 p-0 ${editor.isActive('italic') ? 'bg-blue-600 text-white hover:bg-blue-700' : ''}`}
+              className={`${btnBase} ${editor.isActive('italic') ? activeCls : ''}`}
             >
               <Italic className="h-4 w-4" />
             </Button>
@@ -236,7 +240,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
               variant={editor.isActive('underline') ? 'default' : 'ghost'}
               size="sm"
               onClick={() => editor.chain().focus().toggleUnderline().run()}
-              className={`h-8 w-8 p-0 ${editor.isActive('underline') ? 'bg-blue-600 text-white hover:bg-blue-700' : ''}`}
+              className={`${btnBase} ${editor.isActive('underline') ? activeCls : ''}`}
             >
               <Underline className="h-4 w-4" />
             </Button>
@@ -250,7 +254,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
               variant={editor.isActive('strike') ? 'default' : 'ghost'}
               size="sm"
               onClick={() => editor.chain().focus().toggleStrike().run()}
-              className={`h-8 w-8 p-0 ${editor.isActive('strike') ? 'bg-blue-600 text-white hover:bg-blue-700' : ''}`}
+              className={`${btnBase} ${editor.isActive('strike') ? activeCls : ''}`}
             >
               <Strikethrough className="h-4 w-4" />
             </Button>
@@ -258,12 +262,12 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
           <TooltipContent>Strikethrough</TooltipContent>
         </Tooltip>
 
-        <Separator orientation="vertical" className="h-6 mx-1" />
+        <Separator orientation="vertical" className="h-6 mx-1 shrink-0" />
 
         {/* Text Color */}
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+            <Button variant="ghost" size="sm" className={btnBase}>
               <div className="relative">
                 <Palette className="h-4 w-4" />
                 <div
@@ -285,7 +289,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
                       editor.chain().focus().setColor(color.value).run();
                     }
                   }}
-                  className="w-6 h-6 rounded-md hover:scale-110 transition-transform border border-gray-200"
+                  className="w-6 h-6 rounded-md hover:scale-110 transition-transform border border-slate-200"
                   style={{ backgroundColor: color.value === 'inherit' ? '#1f2937' : color.value }}
                   title={color.name}
                 />
@@ -297,7 +301,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
         {/* Highlight Color */}
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+            <Button variant="ghost" size="sm" className={btnBase}>
               <div className="relative">
                 <Highlighter className="h-4 w-4" />
                 <div
@@ -319,7 +323,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
                       editor.chain().focus().toggleHighlight({ color: color.value }).run();
                     }
                   }}
-                  className="w-6 h-6 rounded-md hover:scale-110 transition-transform border border-gray-200"
+                  className="w-6 h-6 rounded-md hover:scale-110 transition-transform border border-slate-200"
                   style={{ backgroundColor: color.value === 'transparent' ? '#fff' : color.value }}
                   title={color.name}
                 />
@@ -328,7 +332,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
           </PopoverContent>
         </Popover>
 
-        <Separator orientation="vertical" className="h-6 mx-1" />
+        <Separator orientation="vertical" className="h-6 mx-1 shrink-0" />
 
         {/* Alignment */}
         <Tooltip>
@@ -337,7 +341,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
               variant={editor.isActive({ textAlign: 'left' }) ? 'default' : 'ghost'}
               size="sm"
               onClick={() => editor.chain().focus().setTextAlign('left').run()}
-              className={`h-8 w-8 p-0 ${editor.isActive({ textAlign: 'left' }) ? 'bg-blue-600 text-white' : ''}`}
+              className={`${btnBase} ${editor.isActive({ textAlign: 'left' }) ? activeCls : ''}`}
             >
               <AlignLeft className="h-4 w-4" />
             </Button>
@@ -351,7 +355,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
               variant={editor.isActive({ textAlign: 'center' }) ? 'default' : 'ghost'}
               size="sm"
               onClick={() => editor.chain().focus().setTextAlign('center').run()}
-              className={`h-8 w-8 p-0 ${editor.isActive({ textAlign: 'center' }) ? 'bg-blue-600 text-white' : ''}`}
+              className={`${btnBase} ${editor.isActive({ textAlign: 'center' }) ? activeCls : ''}`}
             >
               <AlignCenter className="h-4 w-4" />
             </Button>
@@ -365,7 +369,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
               variant={editor.isActive({ textAlign: 'right' }) ? 'default' : 'ghost'}
               size="sm"
               onClick={() => editor.chain().focus().setTextAlign('right').run()}
-              className={`h-8 w-8 p-0 ${editor.isActive({ textAlign: 'right' }) ? 'bg-blue-600 text-white' : ''}`}
+              className={`${btnBase} ${editor.isActive({ textAlign: 'right' }) ? activeCls : ''}`}
             >
               <AlignRight className="h-4 w-4" />
             </Button>
@@ -379,7 +383,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
               variant={editor.isActive({ textAlign: 'justify' }) ? 'default' : 'ghost'}
               size="sm"
               onClick={() => editor.chain().focus().setTextAlign('justify').run()}
-              className={`h-8 w-8 p-0 ${editor.isActive({ textAlign: 'justify' }) ? 'bg-blue-600 text-white' : ''}`}
+              className={`${btnBase} ${editor.isActive({ textAlign: 'justify' }) ? activeCls : ''}`}
             >
               <AlignJustify className="h-4 w-4" />
             </Button>
@@ -387,7 +391,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
           <TooltipContent>Justify</TooltipContent>
         </Tooltip>
 
-        <Separator orientation="vertical" className="h-6 mx-1" />
+        <Separator orientation="vertical" className="h-6 mx-1 shrink-0" />
 
         {/* Lists */}
         <Tooltip>
@@ -396,7 +400,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
               variant={editor.isActive('bulletList') ? 'default' : 'ghost'}
               size="sm"
               onClick={() => editor.chain().focus().toggleBulletList().run()}
-              className={`h-8 w-8 p-0 ${editor.isActive('bulletList') ? 'bg-blue-600 text-white' : ''}`}
+              className={`${btnBase} ${editor.isActive('bulletList') ? activeCls : ''}`}
             >
               <List className="h-4 w-4" />
             </Button>
@@ -410,7 +414,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
               variant={editor.isActive('orderedList') ? 'default' : 'ghost'}
               size="sm"
               onClick={() => editor.chain().focus().toggleOrderedList().run()}
-              className={`h-8 w-8 p-0 ${editor.isActive('orderedList') ? 'bg-blue-600 text-white' : ''}`}
+              className={`${btnBase} ${editor.isActive('orderedList') ? activeCls : ''}`}
             >
               <ListOrdered className="h-4 w-4" />
             </Button>
@@ -424,7 +428,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
               variant={editor.isActive('blockquote') ? 'default' : 'ghost'}
               size="sm"
               onClick={() => editor.chain().focus().toggleBlockquote().run()}
-              className={`h-8 w-8 p-0 ${editor.isActive('blockquote') ? 'bg-blue-600 text-white' : ''}`}
+              className={`${btnBase} ${editor.isActive('blockquote') ? activeCls : ''}`}
             >
               <Quote className="h-4 w-4" />
             </Button>
@@ -438,7 +442,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
               variant={editor.isActive('codeBlock') ? 'default' : 'ghost'}
               size="sm"
               onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-              className={`h-8 w-8 p-0 ${editor.isActive('codeBlock') ? 'bg-blue-600 text-white' : ''}`}
+              className={`${btnBase} ${editor.isActive('codeBlock') ? activeCls : ''}`}
             >
               <Code className="h-4 w-4" />
             </Button>
@@ -446,7 +450,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
           <TooltipContent>Code Block</TooltipContent>
         </Tooltip>
 
-        <Separator orientation="vertical" className="h-6 mx-1" />
+        <Separator orientation="vertical" className="h-6 mx-1 shrink-0" />
 
         {/* Link */}
         <Popover>
@@ -454,7 +458,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
             <Button
               variant={editor.isActive('link') ? 'default' : 'ghost'}
               size="sm"
-              className={`h-8 w-8 p-0 ${editor.isActive('link') ? 'bg-blue-600 text-white' : ''}`}
+              className={`${btnBase} ${editor.isActive('link') ? activeCls : ''}`}
             >
               <Link className="h-4 w-4" />
             </Button>
@@ -466,9 +470,11 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
                 placeholder="Enter URL"
                 value={linkUrl}
                 onChange={(e) => setLinkUrl(e.target.value)}
-                className="w-full px-3 py-2 border rounded text-sm"
+                className="w-full px-3 py-2 border border-slate-200 rounded-md text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
               />
-              <Button size="sm" onClick={setLink} className="w-full">Add Link</Button>
+              <Button size="sm" onClick={setLink} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white">
+                Add Link
+              </Button>
               {editor.isActive('link') && (
                 <Button
                   size="sm"
@@ -486,7 +492,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
         {/* Image */}
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+            <Button variant="ghost" size="sm" className={btnBase}>
               <Image className="h-4 w-4" />
             </Button>
           </PopoverTrigger>
@@ -497,9 +503,11 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
                 placeholder="Enter image URL"
                 value={imageUrl}
                 onChange={(e) => setimageUrl(e.target.value)}
-                className="w-full px-3 py-2 border rounded text-sm"
+                className="w-full px-3 py-2 border border-slate-200 rounded-md text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
               />
-              <Button size="sm" onClick={addImage} className="w-full">Add Image</Button>
+              <Button size="sm" onClick={addImage} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white">
+                Add Image
+              </Button>
             </div>
           </PopoverContent>
         </Popover>
@@ -511,7 +519,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
               variant="ghost"
               size="sm"
               onClick={() => editor.chain().focus().setHorizontalRule().run()}
-              className="h-8 w-8 p-0"
+              className={btnBase}
             >
               <Minus className="h-4 w-4" />
             </Button>
@@ -519,8 +527,9 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
           <TooltipContent>Horizontal Rule</TooltipContent>
         </Tooltip>
 
-        <div className="ml-auto flex items-center gap-2">
-          <span className="text-xs text-gray-400">Auto-saved</span>
+        <div className="ml-auto flex items-center gap-1.5 pl-2 shrink-0">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+          <span className="text-xs text-slate-400 whitespace-nowrap">Saved</span>
         </div>
       </div>
     </TooltipProvider>
