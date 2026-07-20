@@ -12,12 +12,12 @@ import {
   ChevronRight,
   Plus,
   Star,
-  Home,
 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { cn } from '@/lib/utils';
 
 const sidebarItems = [
   { icon: FileText, label: 'My Documents', path: '/dashboard', filter: 'owned' },
@@ -40,17 +40,110 @@ export default function Sidebar() {
 
   const isActive = (path: string) => location.pathname + location.search === path;
 
+  const navLinkClasses = (active: boolean) =>
+    cn(
+      'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors duration-150 relative group',
+      active
+        ? 'bg-indigo-50 text-indigo-700'
+        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+    );
+
+  const navIconClasses = (active: boolean) =>
+    cn('h-5 w-5 shrink-0', active ? 'text-indigo-600' : 'text-slate-400 group-hover:text-slate-600');
+
   return (
-    <motion.aside
-      initial={false}
-      animate={{ width: sidebarOpen ? 280 : 80 }}
-      transition={{ duration: 0.3, ease: 'easeInOut' }}
-      className="fixed left-0 top-16 bottom-0 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border-r border-slate-700/50 z-40 flex flex-col shadow-lg"
-    >
+    <>
+      {/* Backdrop — mobile drawer only */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-slate-900/20 z-30 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* MOBILE: slide-over drawer, full nav always expanded */}
+      <motion.aside
+        animate={{ x: sidebarOpen ? 0 : '-100%' }}
+        transition={{ duration: 0.2, ease: 'easeInOut' }}
+        className="fixed left-0 top-16 bottom-0 w-72 bg-white border-r border-slate-200 z-40 flex flex-col shadow-lg md:hidden"
+      >
+        <SidebarContent
+          sidebarOpen
+          items={sidebarItems}
+          isActive={isActive}
+          location={location}
+          navLinkClasses={navLinkClasses}
+          navIconClasses={navIconClasses}
+          onNewDocument={handleNewDocument}
+          hoveredItem={hoveredItem}
+          setHoveredItem={setHoveredItem}
+        />
+      </motion.aside>
+
+      {/* DESKTOP: static collapsible icon-rail */}
+      <motion.aside
+        initial={false}
+        animate={{ width: sidebarOpen ? 280 : 80 }}
+        transition={{ duration: 0.3, ease: 'easeInOut' }}
+        className="hidden md:flex fixed left-0 top-16 bottom-0 bg-white border-r border-slate-200 z-20 flex-col shadow-sm"
+      >
+        <SidebarContent
+          sidebarOpen={sidebarOpen}
+          items={sidebarItems}
+          isActive={isActive}
+          location={location}
+          navLinkClasses={navLinkClasses}
+          navIconClasses={navIconClasses}
+          onNewDocument={handleNewDocument}
+          hoveredItem={hoveredItem}
+          setHoveredItem={setHoveredItem}
+        />
+
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          aria-label={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+          className="absolute -right-3 top-6 w-6 h-6 bg-white border border-slate-200 rounded-full flex items-center justify-center text-slate-500 hover:text-slate-900 hover:bg-slate-50 shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+        >
+          {sidebarOpen ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+        </button>
+      </motion.aside>
+    </>
+  );
+}
+
+// Shared nav body rendered by both the mobile drawer and desktop rail, so
+// the two never drift out of sync as items are added or changed.
+function SidebarContent({
+  sidebarOpen,
+  items,
+  isActive,
+  location,
+  navLinkClasses,
+  navIconClasses,
+  onNewDocument,
+  hoveredItem,
+  setHoveredItem,
+}: {
+  sidebarOpen: boolean;
+  items: typeof sidebarItems;
+  isActive: (path: string) => boolean;
+  location: ReturnType<typeof useLocation>;
+  navLinkClasses: (active: boolean) => string;
+  navIconClasses: (active: boolean) => string;
+  onNewDocument: () => void;
+  hoveredItem: string | null;
+  setHoveredItem: (item: string | null) => void;
+}) {
+  return (
+    <>
       <div className="p-3">
         <Button
-          onClick={handleNewDocument}
-          className={`bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white w-full font-semibold transition-all duration-200 ${sidebarOpen ? 'justify-start gap-2' : 'justify-center'} shadow-md hover:shadow-lg`}
+          onClick={onNewDocument}
+          className={cn(
+            'bg-indigo-600 hover:bg-indigo-700 text-white w-full font-semibold transition-colors',
+            sidebarOpen ? 'justify-start gap-2' : 'justify-center'
+          )}
         >
           <Plus className="h-5 w-5" />
           {sidebarOpen && <span>New</span>}
@@ -58,8 +151,8 @@ export default function Sidebar() {
       </div>
 
       <ScrollArea className="flex-1 px-2">
-        <nav className="space-y-1.5 py-2">
-          {sidebarItems.map((item) => {
+        <nav className="space-y-1 py-2">
+          {items.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.path);
 
@@ -67,18 +160,12 @@ export default function Sidebar() {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 relative group ${
-                  active
-                    ? 'bg-gradient-to-r from-blue-600/90 to-blue-500/90 text-white shadow-md'
-                    : 'text-slate-300 hover:text-white hover:bg-slate-700/50'
-                }`}
+                className={navLinkClasses(active)}
                 onMouseEnter={() => setHoveredItem(item.path)}
                 onMouseLeave={() => setHoveredItem(null)}
               >
-                <Icon className={`h-5 w-5 flex-shrink-0 transition-transform duration-200 ${active ? 'text-white' : 'text-slate-400 group-hover:text-blue-400'}`} />
-                {sidebarOpen && (
-                  <span className="font-medium text-sm tracking-wide">{item.label}</span>
-                )}
+                <Icon className={navIconClasses(active)} />
+                {sidebarOpen && <span className="font-medium text-sm">{item.label}</span>}
                 {!sidebarOpen && hoveredItem === item.path && (
                   <AnimatePresence>
                     <motion.div
@@ -86,7 +173,7 @@ export default function Sidebar() {
                       animate={{ opacity: 1, x: 0, scale: 1 }}
                       exit={{ opacity: 0, x: -10, scale: 0.95 }}
                       transition={{ duration: 0.15 }}
-                      className="absolute left-full ml-3 px-3 py-2 bg-slate-700 text-white text-sm rounded-lg whitespace-nowrap z-50 shadow-lg font-medium"
+                      className="absolute left-full ml-3 px-3 py-2 bg-slate-900 text-white text-sm rounded-lg whitespace-nowrap z-50 shadow-lg font-medium"
                     >
                       {item.label}
                     </motion.div>
@@ -98,30 +185,12 @@ export default function Sidebar() {
         </nav>
       </ScrollArea>
 
-      <div className="border-t border-slate-700/50 p-2">
-        <Link
-          to="/settings"
-          className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group ${
-            location.pathname === '/settings'
-              ? 'bg-gradient-to-r from-blue-600/90 to-blue-500/90 text-white shadow-md'
-              : 'text-slate-300 hover:text-white hover:bg-slate-700/50'
-          }`}
-        >
-          <Settings className={`h-5 w-5 transition-transform duration-200 ${location.pathname === '/settings' ? 'text-white' : 'text-slate-400 group-hover:text-blue-400'}`} />
-          {sidebarOpen && <span className="font-medium text-sm tracking-wide">Settings</span>}
+      <div className="border-t border-slate-200 p-2">
+        <Link to="/settings" className={navLinkClasses(location.pathname === '/settings')}>
+          <Settings className={navIconClasses(location.pathname === '/settings')} />
+          {sidebarOpen && <span className="font-medium text-sm">Settings</span>}
         </Link>
       </div>
-
-      <button
-        onClick={() => setSidebarOpen(!sidebarOpen)}
-        className="absolute -right-3 top-20 w-6 h-6 bg-slate-700 border border-slate-600 rounded-full flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-600 shadow-md transition-all duration-200"
-      >
-        {sidebarOpen ? (
-          <ChevronLeft className="h-4 w-4" />
-        ) : (
-          <ChevronRight className="h-4 w-4" />
-        )}
-      </button>
-    </motion.aside>
+    </>
   );
 }
